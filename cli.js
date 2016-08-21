@@ -4,6 +4,7 @@
 
 var fs = require('fs');
 var readline = require('readline');
+var path = require('path');
 var chalk = require('chalk');
 var stringWidth = require('string-width');
 var widestLine = require('widest-line');
@@ -161,6 +162,45 @@ var cli = module.exports = {
 			text = chalk[style]( text );
 		} );
 		return text;
+	},
+	
+	tree: function(dir, indent, args) {
+		// render dir/file tree view based on array of files/dirs
+		var self = this;
+		if (!dir) dir = ".";
+		if (!indent) indent = "";
+		if (!args) args = {};
+		var output = [];
+		
+		args.folderStyles = args.folderStyles || ["bold", "yellow"];
+		args.fileStyles = args.fileStyles || ["green"];
+		args.symlinkStyles = args.symlinkStyles || ["purple"];
+		args.lineStyles = args.lineStyles || ["gray"];
+		
+		if (!indent) {
+			output.push( this.applyStyles( path.basename(dir) + "/", args.folderStyles ) );
+		}
+		
+		fs.readdirSync(dir).forEach( function(filename, idx, arr) {
+			var file = path.join( dir, filename );
+			var stats = fs.statSync(file);
+			var last = (idx == arr.length - 1);
+			var prefix = indent + self.applyStyles( " " + (last ? "└" : "├"), args.lineStyles ) + " ";
+			
+			if (stats.isDirectory()) {
+				output.push( prefix + self.applyStyles(filename + "/", args.folderStyles) );
+				var results = self.tree(file, indent + self.applyStyles( last ? "  " : " │", args.lineStyles ) + " ", args );
+				if (results) output.push( results );
+			}
+			else if (stats.isSymbolicLink()) {
+				output.push( prefix + self.applyStyles(filename, args.symlinkStyles) );
+			}
+			else {
+				output.push( prefix + self.applyStyles(filename, args.fileStyles) );
+			}
+		} );
+		
+		return output.length ? output.join("\n") : "";
 	},
 	
 	table: function(rows, args) {
@@ -359,7 +399,7 @@ var cli = module.exports = {
 			this.timer = setInterval( this.draw.bind(this), args.freq );
 			
 			// hide CLI cursor
-			process.stdout.write('\u001b[?25l');
+			cli.print('\u001b[?25l');
 			
 			// just in case
 			process.once('exit', function() {
@@ -485,7 +525,7 @@ var cli = module.exports = {
 			this.args = {};
 			
 			// restore CLI cursor
-			process.stdout.write('\u001b[?25h');
+			cli.print('\u001b[?25h');
 		}
 	} // progress
 	
