@@ -46,6 +46,28 @@ verbose("This will only be printed in verbose mode.\n");
 
 See [Verbose Mode](#verbose-mode) below for details.
 
+#### STDERR
+
+To print something to [STDERR](https://nodejs.org/api/process.html#process_process_stderr) you can use the `cli.warn()` method.  This works similarly as `cli.print()` in that it honors [Quiet Mode](#quiet-mode), does not include a trailing EOL, and gets imported to the global namespace if `cli.global()` is called.  Example:
+
+```js
+var cli = require('pixl-cli');
+cli.global();
+
+warn("This will be printed to STDERR.\n");
+```
+
+#### Dying
+
+To print something to [STDERR](https://nodejs.org/api/process.html#process_process_stderr) and exit immediately afterward, you can call `cli.die()` and pass in a message.  This will exit with a non-zero code indicating that the process "failed".  This method also gets imported to the global namespace if `cli.global()` is called.  Example:
+
+```js
+var cli = require('pixl-cli');
+cli.global();
+
+die("A fatal error occurred.\n");
+```
+
 ### Loading and Saving Files
 
 Simple methods are provided to load and save files to/from strings.  These are both synchronous calls.  They are `loadFile()` which accepts a file path and returns the contents as a string, and `saveFile()` which accepts a file path and contents as a string.  `saveFile()` writes to the specified file, replacing any existing content, and creating the file if necessary.  Example of both functions:
@@ -565,6 +587,8 @@ The full list of methods and objects that are imported are:
 
 - `print()`
 - `verbose()`
+- `warn()`
+- `die()`
 - `loadFile()`
 - `saveFile()`
 - `appendFile()`

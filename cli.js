@@ -305,6 +305,17 @@ var cli = module.exports = {
 		if (this.args.verbose) this.print(msg);
 	},
 	
+	warn: function(msg) {
+		// print to stderr
+		if (!this.args.quiet) process.stderr.write(msg);
+	},
+	
+	die: function(msg) {
+		// print to stderr and exit with non-zero code
+		this.warn(msg);
+		process.exit(1);
+	},
+	
 	global: function() {
 		// pollute global namespace with our wares
 		var self = this;
@@ -315,7 +326,7 @@ var cli = module.exports = {
 		global.Tools = Tools;
 		
 		// bind wrap functions
-		["prompt", "yesno", "table", "box", "wrap", "center", "print", "verbose", "loadFile", "saveFile", "appendFile"].forEach( function(func) {
+		["prompt", "yesno", "table", "box", "wrap", "center", "print", "verbose", "warn", "die", "loadFile", "saveFile", "appendFile"].forEach( function(func) {
 			global[func] = self[func].bind(self);
 		} );
 		
