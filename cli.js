@@ -41,16 +41,34 @@ var cli = module.exports = {
 	
 	prompt: function(text, def, callback) {
 		// prompt user for input, send answer to callback
+		var self = this;
 		if (!this.tty()) return callback(def);
 		var rl = readline.createInterface(process.stdin, process.stdout);
 		
 		if (!text.match(/\s$/)) text += ' ';
 		if (def) text += '[' + def + '] ';
 		
+		this.currentPrompt = text;
+		
 		rl.question(text, function(answer) {
 			rl.close();
+			delete self.currentPrompt;
 			callback( answer || def );
 		} );
+	},
+	
+	clearPrompt: function() {
+		// erase previous prompt text, if any
+		if (this.currentPrompt) {
+			process.stdout.write( "\r" + this.space( stringWidth(this.currentPrompt) ) + "\r" );
+		}
+	},
+	
+	restorePrompt: function() {
+		// restore previous prompt text, if any
+		if (this.currentPrompt) {
+			process.stdout.write( this.currentPrompt );
+		}
 	},
 	
 	yesno: function(text, def, callback) {
