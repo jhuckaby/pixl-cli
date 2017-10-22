@@ -194,12 +194,15 @@ var cli = module.exports = {
 		args.fileStyles = args.fileStyles || ["green"];
 		args.symlinkStyles = args.symlinkStyles || ["purple"];
 		args.lineStyles = args.lineStyles || ["gray"];
+		args.includeFilter = args.includeFilter || /./;
+		args.excludeFilter = args.excludeFilter || /(?!)/;
 		
 		if (!indent) {
 			output.push( this.applyStyles( path.basename(dir) + "/", args.folderStyles ) );
 		}
 		
 		fs.readdirSync(dir).forEach( function(filename, idx, arr) {
+			if (!filename.match(args.includeFilter) || filename.match(args.excludeFilter)) return;
 			var file = path.join( dir, filename );
 			var stats = fs.statSync(file);
 			var last = (idx == arr.length - 1);
