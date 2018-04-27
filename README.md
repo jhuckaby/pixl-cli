@@ -519,6 +519,11 @@ cli.progress.update({
 });
 ```
 
+### Keep progress bar visible after it ends
+
+To keep the progress bar visible after it reaches 100%, just pass the value `false` to the 
+`cli.progress.end()` function. This will prevent it from being erased from the screen.
+
 ### Unicode or ASCII
 
 By default the progress bar is rendered using various Unicode characters:
