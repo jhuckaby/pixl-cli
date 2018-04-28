@@ -546,12 +546,14 @@ var cli = module.exports = {
 			}
 		},
 		
-		end: function() {
+		end: function(erase) {
 			// end of progress session
 			if (!cli.tty()) return;
 			if (!this.running) return;
 			
-			this.erase();
+			if (erase !== false) {
+			  this.erase();
+			}
 			clearTimeout( this.timer );
 			this.running = false;
 			this.args = {};
