@@ -232,7 +232,7 @@ Absent any options, the box will be sized to fit your text string, with exactly 
 | Property Name | Description |
 |---------------|-------------|
 | `width` | An optional fixed width.  If specified and the string exceeds the width, it will be word-wrapped. | 
-| `styles` | An array of [chalk](https://www.npmjs.com/package/chalk) styles to apply to the box border graphics, defaults to `["gray"]`. | 
+| `styles` | An array of [chalk](https://www.npmjs.com/package/chalk) styles or functions to apply to the box border graphics, defaults to `["gray"]`. | 
 | `hspace` | An optional number of spaces to insert on the left and right sides of the text (defaults to `1`).  | 
 | `vspace` | An optional number of vertical lines to insert above and below the text (defaults to `0`). | 
 | `indent` | Number of characters to indent the box by (defaults to `0`). |
@@ -245,7 +245,7 @@ var text = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiu
 cli.print(
 	cli.box( text, {
 		width: 40,
-		styles: ["magenta"],
+		styles: ["magenta", function( text ) { return text.toUpperCase() }],
 		hspace: 2,
 		vspace: 1,
 		indent: 4
@@ -362,9 +362,9 @@ Of course, if your Terminal supports ANSI color and font styles, the header woul
 
 | Property Name | Description |
 |---------------|-------------|
-| `headerStyles` | An array of [chalk](https://www.npmjs.com/package/chalk) styles to apply to the header cell text. |
-| `textStyles` | An array of [chalk](https://www.npmjs.com/package/chalk) styles to apply to the table cell text. |
-| `borderStyles` | An array of [chalk](https://www.npmjs.com/package/chalk) styles to apply to the border graphics. |
+| `headerStyles` | An array of [chalk](https://www.npmjs.com/package/chalk) styles or functions to apply to the header cell text. |
+| `textStyles` | An array of [chalk](https://www.npmjs.com/package/chalk) styles or functions to apply to the table cell text. |
+| `borderStyles` | An array of [chalk](https://www.npmjs.com/package/chalk) styles or functions to apply to the border graphics. |
 | `indent` | Number of characters to indent the table by (defaults to `0`). |
 
 Here is an example specifying all the possible options:
@@ -373,14 +373,14 @@ Here is an example specifying all the possible options:
 cli.print( 
 	cli.table(rows, {
 		headerStyles: ["bold", "yellow"],
-		textStyles: ["cyan"],
+		textStyles: ["cyan", function( text ) { return text.toUpperCase() }],
 		borderStyles: ["gray"],
 		indent: 0
 	}) + "\n" 
 );
 ```
 
-Each of the three style keys should be set to an array of style names supported by the [chalk](https://www.npmjs.com/package/chalk) module.  These are arrays because each component may contain multiple styles.  For example, the `headerStyles` is rendered with both `yellow` and `bold` by default.
+Each of the three style keys should be set to an array of style names supported by the [chalk](https://www.npmjs.com/package/chalk) module or a custom function to support different text transformations.  These are arrays because each component may contain multiple styles.  For example, the `headerStyles` is rendered with both `yellow` and `bold` by default.
 
 Note that each text cell must only be one line (multi-line is not supported).
 
@@ -483,7 +483,7 @@ cli.progress.start({
 
 ### Changing Color Styles
 
-The progress bar uses a set of color styles from the [chalk](https://www.npmjs.com/package/chalk) module for the spinner, braces, bar chunks, percentage display, remaining time, and your custom text (if applicable).  To customize these, pass in a `styles` object with the following keys:
+The progress bar uses a set of color styles from the [chalk](https://www.npmjs.com/package/chalk) module or a custom function for the spinner, braces, bar chunks, percentage display, remaining time, and your custom text (if applicable).  To customize these, pass in a `styles` object with the following keys:
 
 ```js
 cli.progress.start({
@@ -493,12 +493,12 @@ cli.progress.start({
 		bar: ['bold', 'cyan'],
 		pct: ['bold', 'yellow'],
 		remain: ['green'],
-		text: []
+		text: [function( text ) { return text.toUpperCase() }]
 	}
 });
 ```
 
-Each key should be set to an array of styles supported by the [chalk](https://www.npmjs.com/package/chalk) module.  These are arrays because each component may contain multiple styles.  For example, by default the `spinner`, `bar` and `pct` are styled with both a color and `bold`.
+Each key should be set to an array of styles supported by the [chalk](https://www.npmjs.com/package/chalk) module or a function.  These are arrays because each component may contain multiple styles.  For example, by default the `spinner`, `bar` and `pct` are styled with both a color and `bold`.
 
 ### Automatic Width
 

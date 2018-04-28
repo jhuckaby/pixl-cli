@@ -174,10 +174,14 @@ var cli = module.exports = {
 	},
 	
 	applyStyles: function(text, styles) {
-		// apply one or more chalk styles to text string
+		// apply one or more chalk styles or functions to text string
 		if (!styles) return text;
 		styles.forEach( function(style) {
-			text = chalk[style]( text );
+			if (typeof style === 'function') {
+				text = style( text );
+			} else {
+				text = chalk[style]( text );
+			}
 		} );
 		return text;
 	},
