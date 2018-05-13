@@ -528,6 +528,7 @@ var cli = module.exports = {
 		
 		update: function(args) {
 			if (!cli.tty()) return;
+			if (!this.running) return;
 			
 			if (typeof(args) == 'number') {
 				// just updating the amount
