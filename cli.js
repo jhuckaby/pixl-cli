@@ -82,7 +82,7 @@ var cli = module.exports = {
 	repeat: function(text, amount) {
 		// repeat string by specified number of times
 		if (!amount || (amount < 0)) return "";
-		return repeating(text, amount);
+		return repeating(amount, ''+text);
 	},
 	
 	space: function(amount) {
