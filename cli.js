@@ -361,9 +361,9 @@ var cli = module.exports = {
 		} );
 		
 		// expose chalk styles as global keywords
-		for (var key in chalk.styles) {
-			if (chalk[key]) global[key] = chalk[key];
-		}
+		["reset","bold","dim","italic","underline","inverse","hidden","strikethrough","black","red","green","yellow","blue","magenta","cyan","white","gray","grey","bgBlack","bgRed","bgGreen","bgYellow","bgBlue","bgMagenta","bgCyan","bgWhite"].forEach( function(key) {
+			global[key] = chalk[key];
+		} );
 	},
 	
 	progress: {
