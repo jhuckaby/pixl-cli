@@ -1,5 +1,5 @@
 // Tools for writing command-line apps in Node.
-// Copyright (c) 2016 Joseph Huckaby
+// Copyright (c) 2016 - 2018 Joseph Huckaby
 // Released under the MIT License
 
 var fs = require('fs');
@@ -576,6 +576,6 @@ var cli = module.exports = {
 } );
 
 // import chalk into our module
-for (var key in chalk.styles) {
-	if (chalk[key]) module.exports[key] = chalk[key];
-}
+["reset","bold","dim","italic","underline","inverse","hidden","strikethrough","black","red","green","yellow","blue","magenta","cyan","white","gray","grey","bgBlack","bgRed","bgGreen","bgYellow","bgBlue","bgMagenta","bgCyan","bgWhite"].forEach( function(key) {
+	module.exports[key] = chalk[key];
+} );
