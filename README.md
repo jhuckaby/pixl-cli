@@ -1,3 +1,40 @@
+<details><summary>Table of Contents</summary>
+
+<!-- toc -->
+- [Overview](#overview)
+- [Usage](#usage)
+	* [Basic Tools](#basic-tools)
+		+ [Printing](#printing)
+			- [STDERR](#stderr)
+			- [Dying](#dying)
+		+ [Logging](#logging)
+		+ [Loading and Saving Files](#loading-and-saving-files)
+		+ [TTY Detection](#tty-detection)
+		+ [Other Tools](#other-tools)
+	* [Command-Line Arguments](#command-line-arguments)
+		+ [Verbose Mode](#verbose-mode)
+		+ [Quiet Mode](#quiet-mode)
+	* [Prompting The User](#prompting-the-user)
+		+ [Yes/No Questions](#yesno-questions)
+	* [Displaying Info Boxes](#displaying-info-boxes)
+		+ [Centering Text](#centering-text)
+		+ [Word-Wrapping Text](#word-wrapping-text)
+	* [Displaying Tables](#displaying-tables)
+	* [Graphical Progress Bars](#graphical-progress-bars)
+		+ [Configuration](#configuration)
+		+ [Temporarily Erasing The Bar](#temporarily-erasing-the-bar)
+		+ [Customizing the Look](#customizing-the-look)
+		+ [Changing Color Styles](#changing-color-styles)
+		+ [Automatic Width](#automatic-width)
+		+ [Keep progress bar visible](#keep-progress-bar-visible)
+		+ [Unicode or ASCII](#unicode-or-ascii)
+		+ [Hiding the Cursor](#hiding-the-cursor)
+	* [Chalk](#chalk)
+	* [Importing Into Global](#importing-into-global)
+- [License](#license)
+
+</details>
+
 # Overview
 
 This module provides utilities for creating command-line Node.js apps.  Features include automatic parsing of command-line args into simple key/value pairs, prompting the user for information, and displaying graphical info boxes and progress bars.
@@ -31,7 +68,7 @@ cli.global();
 print("Hello world!\n");
 ```
 
-Unlike `console.log()` this does not add an EOL at the end of each string.  It works just like the standard `print()` function from other languages.
+Unlike `console.log()` this does not add an EOL at the end of each string.  It works just like the standard `print()` function from other languages.  However, a `println()` method is also provided which *does* add an EOL.
 
 Note that `print()` will be silent if `--quiet` mode is enabled.  See [Quiet Mode](#quiet-mode) below.
 
@@ -67,6 +104,25 @@ cli.global();
 
 die("A fatal error occurred.\n");
 ```
+
+### Logging
+
+To enable logging mode, so all calls to `print()`, `verbose()`, `warn()` and `die()` also get logged to a file, call `cli.setLogFile()` and pass in a path.  The file need not exist, but the directory should.  Example:
+
+```js
+cli.setLogFile( "/var/log/myscript.log" );
+```
+
+Note that once the log file is set, everything printed is logged, even if quiet mode is enabled.
+
+The log file format is simply a date/time surrounded by square brackets, followed by a single space, followed by the raw text printed.  All color is automatically stripped.  Example log snippet:
+
+```
+[2019/05/18 18:49:12] Hello there!
+[2019/05/18 18:49:13] Good bye!
+```
+
+You can also call `cli.log()` to log something directly without also printing it to the console.  If you pass an object to `cli.log()` it is serialized to JSON.
 
 ### Loading and Saving Files
 
@@ -125,6 +181,8 @@ The following utility functions from the [pixl-tools](https://www.npmjs.com/pack
 | [cli.getNiceRemainingTime()](https://www.npmjs.com/package/pixl-tools#getniceremainingtime) | Calculate estimated remaining time, given progress and start time. |
 | [cli.pluralize()](https://www.npmjs.com/package/pixl-tools#pluralize) | Apply English language pluralization to a word, based on a specified value. |
 | [cli.ucfirst()](https://www.npmjs.com/package/pixl-tools#ucfirst) | Upper-case the first character of a string, lower-case the rest. |
+
+In fact, the entire [pixl-tools](https://www.npmjs.com/package/pixl-tools) module is made available to you as `cli.Tools`, so you don't have to import it separately.
 
 ## Command-Line Arguments
 
@@ -475,7 +533,7 @@ If you switch to [plain ASCII mode](#unicode-or-ascii) by setting the `unicode` 
 ```js
 cli.progress.start({
 	spinner: ['|', '/', '-', "\\"],
-	braces: ['[', ']']
+	braces: ['[', ']'],
 	filling: [' ', '.', ':'],
 	filled: '#'
 });
@@ -519,7 +577,7 @@ cli.progress.update({
 });
 ```
 
-### Keep progress bar visible after it ends
+### Keep progress bar visible
 
 To keep the progress bar visible after it reaches 100%, just pass the value `false` to the 
 `cli.progress.end()` function. This will prevent it from being erased from the screen.
@@ -591,6 +649,7 @@ print( box( bold.red("This is bold, red and in a box!") ) + "\n" );
 The full list of methods and objects that are imported are:
 
 - `print()`
+- `println()`
 - `verbose()`
 - `warn()`
 - `die()`
@@ -613,9 +672,9 @@ The full list of methods and objects that are imported are:
 
 # License
 
-The MIT License
+**The MIT License**
 
-Copyright (c) 2016 Joseph Huckaby.
+*Copyright (c) 2016 - 2019 Joseph Huckaby.*
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

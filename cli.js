@@ -27,6 +27,12 @@ var cli = module.exports = {
 	wordWrap: wordWrap,
 	Tools: Tools,
 	
+	// for stripping colors:
+	ansiPattern: new RegExp([
+		'[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)',
+		'(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~]))'
+	].join('|'), 'g'),
+	
 	tty: function() {
 		// return true if stdout is connected to a TTY, 
 		// i.e. so we can ask the user things
@@ -320,9 +326,36 @@ var cli = module.exports = {
 		return JSON.stringify( mixed, null, "\t" );
 	},
 	
+	stripColor: function(text) {
+		// strip ANSI colors from text
+		return text.replace( this.ansiPattern, '' );
+	},
+	
+	setLogFile: function(file) {
+		// log all output from our print methods to file
+		this.logFile = file;
+	},
+	
+	log: function(msg) {
+		// log something (if log file is configured)
+		if (this.logFile) {
+			if (typeof(msg) == 'object') msg = JSON.stringify(msg);
+			else if (!msg.match(/\S/)) return; // skip whitespace
+			var dargs = Tools.getDateArgs( Tools.timeNow() );
+			var line = '[' + dargs.yyyy_mm_dd + ' ' + dargs.hh_mi_ss + '] ' + this.stripColor(msg.trim()).trim() + "\n";
+			fs.appendFileSync( this.logFile, line );
+		}
+	},
+	
 	print: function(msg) {
 		// print message to console
 		if (!this.args.quiet) process.stdout.write(msg);
+		this.log(msg);
+	},
+	
+	println: function(msg) {
+		// print plus EOL
+		this.print( msg + "\n" );
 	},
 	
 	verbose: function(msg) {
@@ -330,15 +363,31 @@ var cli = module.exports = {
 		if (this.args.verbose) this.print(msg);
 	},
 	
+	verboseln: function(msg) {
+		// verbose print plus EOL
+		this.verbose( msg + "\n" );
+	},
+	
 	warn: function(msg) {
 		// print to stderr
 		if (!this.args.quiet) process.stderr.write(msg);
+		this.log(msg);
+	},
+	
+	warnln: function(msg) {
+		// warn plus EOL
+		this.warn( msg + "\n" );
 	},
 	
 	die: function(msg) {
 		// print to stderr and exit with non-zero code
 		this.warn(msg);
 		process.exit(1);
+	},
+	
+	dieln: function(msg) {
+		// die plus EOL
+		this.die( msg + "\n" );
 	},
 	
 	global: function() {
@@ -351,7 +400,7 @@ var cli = module.exports = {
 		global.Tools = Tools;
 		
 		// bind wrap functions
-		["prompt", "yesno", "table", "box", "wrap", "center", "print", "verbose", "warn", "die", "loadFile", "saveFile", "appendFile"].forEach( function(func) {
+		["prompt", "yesno", "table", "box", "wrap", "center", "print", "println", "verbose", "verboseln", "warn", "warnln", "die", "dieln", "loadFile", "saveFile", "appendFile"].forEach( function(func) {
 			global[func] = self[func].bind(self);
 		} );
 		
@@ -435,7 +484,7 @@ var cli = module.exports = {
 			this.timer = setInterval( this.draw.bind(this), args.freq );
 			
 			// hide CLI cursor
-			cli.print('\u001b[?25l');
+			if (!this.args.quiet) process.stdout.write('\u001b[?25l');
 			
 			// just in case
 			process.once('exit', function() {
@@ -522,7 +571,7 @@ var cli = module.exports = {
 				}
 			}
 			
-			cli.print( line + "\r" );
+			if (!this.args.quiet) process.stdout.write( line + "\r" );
 			this.lastLine = line;
 		},
 		
@@ -546,8 +595,8 @@ var cli = module.exports = {
 		erase: function() {
 			// erase progress
 			if (!cli.tty()) return;
-			if (this.lastLine) {
-				cli.print( cli.space( stringWidth(this.lastLine) ) + "\r" );
+			if (this.lastLine && !this.args.quiet) {
+				process.stdout.write( cli.space( stringWidth(this.lastLine) ) + "\r" );
 			}
 		},
 		
@@ -564,7 +613,7 @@ var cli = module.exports = {
 			this.args = {};
 			
 			// restore CLI cursor
-			cli.print('\u001b[?25h');
+			if (!this.args.quiet) process.stdout.write('\u001b[?25h');
 		}
 	} // progress
 	
