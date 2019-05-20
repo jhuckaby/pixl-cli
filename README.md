@@ -113,7 +113,7 @@ To enable logging mode, so all calls to `print()`, `verbose()`, `warn()` and `di
 cli.setLogFile( "/var/log/myscript.log" );
 ```
 
-Note that once the log file is set, everything printed is logged, even if quiet mode is enabled.
+Note that once the log file is set, everything printed is logged, even if quiet mode is enabled.  Additionally, all calls to `cli.verbose()` are also logged, even if `--verbose` mode is not enabled.
 
 The log file format is simply a date/time surrounded by square brackets, followed by a single space, followed by the raw text printed.  All color is automatically stripped.  Example log snippet:
 

@@ -361,6 +361,7 @@ var cli = module.exports = {
 	verbose: function(msg) {
 		// print only in verbose mode
 		if (this.args.verbose) this.print(msg);
+		else this.log(msg);
 	},
 	
 	verboseln: function(msg) {
