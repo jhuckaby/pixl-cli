@@ -251,7 +251,7 @@ var cli = module.exports = {
 		var widestCols = [];
 		rows.forEach( function(cols, idx) {
 			cols.forEach( function(col, idy) {
-				widestCols[idy] = Math.max( widestCols[idy] || 0, stringWidth(col) + 2 );
+				widestCols[idy] = Math.max( widestCols[idy] || 0, stringWidth(''+col) + 2 );
 			} );
 		} );
 		

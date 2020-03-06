@@ -1,35 +1,35 @@
 {
-  "name": "pixl-cli",
-  "version": "1.0.11",
-  "description": "Tools for building command-line apps for Node.js.",
-  "author": "Joseph Huckaby <jhuckaby@gmail.com>",
-  "homepage": "https://github.com/jhuckaby/pixl-cli",
-  "license": "MIT",
-  "main": "cli.js",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jhuckaby/pixl-cli"
-  },
-  "bugs": {
-    "url": "https://github.com/jhuckaby/pixl-cli/issues"
-  },
-  "keywords": [
-    "cli",
-    "commandline",
-    "prompt",
-    "progress",
-    "progressbar",
-    "table"
-  ],
-  "dependencies": {
-    "pixl-class": "^1.0.0",
-    "pixl-args": "^1.0.0",
-    "pixl-tools": "^1.0.0",
-    "chalk": "2.4.1",
-    "string-width": "2.1.1",
-    "widest-line": "2.0.0",
-    "repeating": "3.0.0",
-    "word-wrap": "1.2.3"
-  },
-  "devDependencies": {}
+	"name": "pixl-cli",
+	"version": "1.0.12",
+	"description": "Tools for building command-line apps for Node.js.",
+	"author": "Joseph Huckaby <jhuckaby@gmail.com>",
+	"homepage": "https://github.com/jhuckaby/pixl-cli",
+	"license": "MIT",
+	"main": "cli.js",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/jhuckaby/pixl-cli"
+	},
+	"bugs": {
+		"url": "https://github.com/jhuckaby/pixl-cli/issues"
+	},
+	"keywords": [
+		"cli",
+		"commandline",
+		"prompt",
+		"progress",
+		"progressbar",
+		"table"
+	],
+	"dependencies": {
+		"pixl-class": "^1.0.0",
+		"pixl-args": "^1.0.0",
+		"pixl-tools": "^1.0.0",
+		"chalk": "2.4.1",
+		"string-width": "2.1.1",
+		"widest-line": "2.0.0",
+		"repeating": "3.0.0",
+		"word-wrap": "1.2.3"
+	},
+	"devDependencies": {}
 }
