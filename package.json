@@ -1,6 +1,6 @@
 {
 	"name": "pixl-cli",
-	"version": "1.0.12",
+	"version": "1.0.13",
 	"description": "Tools for building command-line apps for Node.js.",
 	"author": "Joseph Huckaby <jhuckaby@gmail.com>",
 	"homepage": "https://github.com/jhuckaby/pixl-cli",
@@ -26,8 +26,8 @@
 		"pixl-args": "^1.0.0",
 		"pixl-tools": "^1.0.0",
 		"chalk": "2.4.1",
-		"string-width": "2.1.1",
-		"widest-line": "2.0.0",
+		"string-width": "4.2.0",
+		"widest-line": "3.0.0",
 		"repeating": "3.0.0",
 		"word-wrap": "1.2.3"
 	},
