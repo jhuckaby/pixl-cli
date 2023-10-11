@@ -424,6 +424,7 @@ Of course, if your Terminal supports ANSI color and font styles, the header woul
 | `textStyles` | An array of [chalk](https://www.npmjs.com/package/chalk) styles or functions to apply to the table cell text. |
 | `borderStyles` | An array of [chalk](https://www.npmjs.com/package/chalk) styles or functions to apply to the border graphics. |
 | `indent` | Number of characters to indent the table by (defaults to `0`). |
+| `autoFit` | Automatically "fit" table into the available terminal width, if it is too wide.  This will add ellipsis to longer columns as required. |
 
 Here is an example specifying all the possible options:
 
@@ -433,7 +434,8 @@ cli.print(
 		headerStyles: ["bold", "yellow"],
 		textStyles: ["cyan", function( text ) { return text.toUpperCase() }],
 		borderStyles: ["gray"],
-		indent: 0
+		indent: 0,
+		autoFit: true
 	}) + "\n" 
 );
 ```

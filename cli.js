@@ -234,6 +234,76 @@ var cli = module.exports = {
 		return output.length ? output.join("\n") : "";
 	},
 	
+	autoFitTableRows: function(rows, args) {
+		// add ellipsis to rows as needed to fit entire table into horiz terminal width
+		var self = this;
+		var avail_width = (this.width() - (stringWidth(args.indent) * 2));
+		if (avail_width < 1) return;
+		
+		var max_col_widths = [];
+		rows.forEach( function(cols, idx) {
+			cols.forEach( function(col, idy) {
+				max_col_widths[idy] = Math.max( max_col_widths[idy] || 0, stringWidth(''+col) );
+			} );
+		} );
+		
+		var measureTableWidth = function() {
+			// measure table width with current settings and max_col_widths "virtually" applied
+			var widestCols = [];
+			rows.forEach( function(cols, idx) {
+				cols.forEach( function(col, idy) {
+					var sw = Math.min( stringWidth(''+col), max_col_widths[idy] );
+					widestCols[idy] = Math.max( widestCols[idy] || 0, sw + 2 );
+				} );
+			} );
+			
+			var numCols = widestCols.length;
+			var line = "┌";
+			widestCols.forEach( function(num, idx) {
+				line += self.repeat("─", num);
+				if (idx < numCols - 1) line += "┬";
+			} );
+			line += "┐";
+			
+			return line.length;
+		}; // measureTableWidth
+		
+		// now keep chopping down max_col_widths until we fit
+		while (measureTableWidth() > avail_width) {
+			// find largest max_col_widths and decrement it by 1
+			var longest_col_width = Math.max.apply( Math, max_col_widths );
+			if (longest_col_width < 2) return; // e-brake
+			
+			var longest_col_idx = max_col_widths.indexOf(longest_col_width);
+			if (longest_col_idx == -1) return; // sanity
+			
+			max_col_widths[longest_col_idx]--;
+		}
+		
+		// finally prune affected columns, trying to preserve ANSI color inside column value
+		rows.forEach( function(cols, idx) {
+			cols.forEach( function(col, idy) {
+				col = '' + col;
+				if (stringWidth(col) > max_col_widths[idy]) {
+					var suffix = '';
+					var prefix = '';
+					
+					while (col.match(/^(\u001b\[[^m]*?m)/)) {
+						prefix += RegExp.$1;
+						col = col.replace(/^(\u001b\[[^m]*?m)/, '');
+					}
+					
+					while (col.match(/(\u001b\[[^m]*?m)$/)) {
+						suffix = RegExp.$1 + suffix;
+						col = col.replace(/(\u001b\[[^m]*?m)$/, '');
+					}
+					
+					cols[idy] = prefix + col.substring(0, max_col_widths[idy] - 1) + '…' + suffix;
+				} // too wide
+			});
+		});
+	},
+	
 	table: function(rows, args) {
 		// render table of cols/rows with unicode borders
 		// rows should be an array of arrays (columns), with row 0 being the header
@@ -246,6 +316,8 @@ var cli = module.exports = {
 		args.textStyles = args.textStyles || ["cyan"];
 		args.indent = args.indent || "";
 		if (typeof(args.indent) == 'number') args.indent = cli.space(args.indent);
+		
+		if (args.autoFit) this.autoFitTableRows(rows, args);
 		
 		// calculate widest columns (+1spc of hpadding)
 		var widestCols = [];
