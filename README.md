@@ -43,14 +43,14 @@ This module provides utilities for creating command-line Node.js apps.  Features
 
 Use [npm](https://www.npmjs.com/) to install the module:
 
-```
+```sh
 npm install pixl-cli
 ```
 
 Then use `require()` to load it in your code:
 
-```javascript
-var cli = require('pixl-cli');
+```js
+const cli = require('pixl-cli');
 ```
 
 ## Basic Tools
@@ -62,7 +62,7 @@ Here are some of the more basic functions provided by the package.
 A very simple `cli.print()` method is provided, which prints any string to [STDOUT](https://nodejs.org/api/process.html#process_process_stdout).  This can be shortened to just `print()` if you import everything into the global namespace (see [Importing Into Global](#importing-into-global) below).  Example:
 
 ```js
-var cli = require('pixl-cli');
+const cli = require('pixl-cli');
 cli.global();
 
 print("Hello world!\n");
@@ -75,7 +75,7 @@ Note that `print()` will be silent if `--quiet` mode is enabled.  See [Quiet Mod
 An alternate function is provided for printing verbose output, called `cli.verbose()` (or just `verbose()` if [imported into global](#importing-into-global)).  This function also prints a string to [STDOUT](https://nodejs.org/api/process.html#process_process_stdout), but only does so if `--verbose` mode is enabled.  Example:
 
 ```js
-var cli = require('pixl-cli');
+const cli = require('pixl-cli');
 cli.global();
 
 verbose("This will only be printed in verbose mode.\n");
@@ -88,7 +88,7 @@ See [Verbose Mode](#verbose-mode) below for details.
 To print something to [STDERR](https://nodejs.org/api/process.html#process_process_stderr) you can use the `cli.warn()` method.  This works similarly as `cli.print()` in that it honors [Quiet Mode](#quiet-mode), does not include a trailing EOL, and gets imported to the global namespace if `cli.global()` is called.  Example:
 
 ```js
-var cli = require('pixl-cli');
+const cli = require('pixl-cli');
 cli.global();
 
 warn("This will be printed to STDERR.\n");
@@ -99,7 +99,7 @@ warn("This will be printed to STDERR.\n");
 To print something to [STDERR](https://nodejs.org/api/process.html#process_process_stderr) and exit immediately afterward, you can call `cli.die()` and pass in a message.  This will exit with a non-zero code indicating that the process "failed".  This method also gets imported to the global namespace if `cli.global()` is called.  Example:
 
 ```js
-var cli = require('pixl-cli');
+const cli = require('pixl-cli');
 cli.global();
 
 die("A fatal error occurred.\n");
@@ -110,7 +110,7 @@ die("A fatal error occurred.\n");
 To enable logging mode, so all calls to `print()`, `verbose()`, `warn()` and `die()` also get logged to a file, call `cli.setLogFile()` and pass in a path.  The file need not exist, but the directory should.  Example:
 
 ```js
-cli.setLogFile( "/var/log/myscript.log" );
+cli.setLogFile( "/let/log/myscript.log" );
 ```
 
 Note that once the log file is set, everything printed is logged, even if quiet mode is enabled.  Additionally, all calls to `cli.verbose()` are also logged, even if `--verbose` mode is not enabled.
@@ -129,9 +129,9 @@ You can also call `cli.log()` to log something directly without also printing it
 Simple methods are provided to load and save files to/from strings.  These are both synchronous calls.  They are `loadFile()` which accepts a file path and returns the contents as a string, and `saveFile()` which accepts a file path and contents as a string.  `saveFile()` writes to the specified file, replacing any existing content, and creating the file if necessary.  Example of both functions:
 
 ```js
-var cli = require('pixl-cli');
+const cli = require('pixl-cli');
 
-var contents = cli.loadFile( "my-file.txt" );
+let contents = cli.loadFile( "my-file.txt" );
 cli.print( "File contents: " + contents + "\n" );
 
 contents = "Replacing with new content!";
@@ -162,7 +162,7 @@ Specifically, this queries the [STDOUT](https://nodejs.org/api/process.html#proc
 To detect the width of the current TTY (user's terminal), you can call `cli.width()`.  If a TTY is attached, this will return the current number of characters that will fit in one single line.  Example:
 
 ```js
-var width = cli.width();
+let width = cli.width();
 cli.print("Your terminal is " + width + " characters wide.\n");
 ```
 
@@ -188,13 +188,13 @@ In fact, the entire [pixl-tools](https://www.npmjs.com/package/pixl-tools) modul
 
 Any arguments passed to your script on the command-line are parsed using the [pixl-args](https://www.npmjs.com/package/pixl-args) module, and provided as simple key/value pairs in `cli.args`.  Example:
 
-```
+```sh
 node my-script.js --name "Joseph Huckaby" --city San\ Mateo
 ```
 
 Then `cli.args` will contain:
 
-```js
+```json
 {
 	"name": "Joseph Huckaby",
 	"city": "San Mateo"
@@ -203,13 +203,13 @@ Then `cli.args` will contain:
 
 Several different kinds of arguments are available.  You can use single or double-dashes, strings which appear to be integers or floats are parsed as such, any switch without a value is set to `true`, any repeated switches are converted to an array of values, and any values provided without a switch are appended to a special `other` array, which can come before or after all the switches.  Here is an example of all these things:
 
-```
+```sh
 node my-script.js file1.txt file2.txt --name "Joe" --amount 50 --freq 0.5 -z 1 --verbose --add thing1 --add thing2
 ```
 
 Then `cli.args` will contain:
 
-```js
+```json
 {
 	"other": ["file1.txt", "file2.txt"],
 	"name": "Joe",
@@ -228,7 +228,7 @@ Please see the [pixl-args](https://www.npmjs.com/package/pixl-args) module docum
 The `--verbose` switch has a special meaning.  It is used by the `cli.verbose()` function, and will control whether it outputs anything or not.  `cli.verbose()` works just like `cli.print()` except that it only prints if the `--verbose` switch is present on the command-line.  Example use:
 
 ```js
-var cli = require('pixl-cli');
+const cli = require('pixl-cli');
 cli.verbose("This will only be printed in verbose mode.\n");
 ```  
 
@@ -241,7 +241,7 @@ The `--quiet` switch also has a special meaning.  If passed on the command-line,
 To prompt the user for input, you can call `cli.prompt()`.  Pass in a string to prompt them with, a default answer, and a callback function which will be fired and passed their answer.  This is an asynchronous operation, so beware of code flow.  Example:
 
 ```js
-var cli = require('pixl-cli');
+const cli = require('pixl-cli');
 
 cli.prompt("What is your name?", "", function(name) {
 	cli.print("Hello " + name + "!\n");
@@ -269,8 +269,8 @@ Note that if your script is running without a TTY (i.e. without an attached term
 
 Call `cli.box()` to render a string (or paragraph) of text surrounded by an ASCII art border.  Example:
 
-```
-var cli = require('pixl-cli');
+```js
+const cli = require('pixl-cli');
 
 cli.print( 
 	cli.box("The quick brown fox jumped over the lazy dog.") + "\n" 
@@ -298,7 +298,7 @@ Absent any options, the box will be sized to fit your text string, with exactly 
 Example:
 
 ```js
-var text = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+let text = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
 
 cli.print(
 	cli.box( text, {
@@ -390,9 +390,9 @@ id est laborum.
 Calling `cli.table()` produces a nicely formatted ASCII table with a grid of data.  It expects an array of rows, and each element should be an array of columns.  The first row will be rendered as the "header" and use a different style.  Example:
 
 ```js
-var cli = require('pixl-cli');
+const cli = require('pixl-cli');
 
-var rows = [
+let rows = [
 	[ "Username", "Full Name", "Email Address", "Status" ],
 	[ "jhuckaby", "Joseph Huckaby", "jhuckaby@test.com", "Administrator" ],
 	[ "tsmith", "Tom Smith", "smith@email.com", "Active" ],
@@ -453,9 +453,9 @@ To display a graphical ASCII progress bar, first call `cli.progress.start()` to 
 Here is a simple example:
 
 ```js
-var cli = require('pixl-cli');
+const cli = require('pixl-cli');
 
-var amount = 0;
+let amount = 0;
 cli.progress.start();
 
 setInterval( function() {
@@ -633,7 +633,7 @@ cli.progress.start({
 All the style methods from the wonderful [chalk](https://www.npmjs.com/package/chalk) module are automatically imported, so you can use them like this:
 
 ```js
-var cli = require('pixl-cli');
+const cli = require('pixl-cli');
 cli.print( cli.bold.red("This is bold and red!") + "\n" );
 ```
 
@@ -642,7 +642,7 @@ cli.print( cli.bold.red("This is bold and red!") + "\n" );
 You can optionally import some of the most commonly used methods into the global namespace, so you can use them from anywhere without having to prefix them.  The method list includes `print()`, `verbose()`, a bunch of others (see below), as well as all the [chalk](https://www.npmjs.com/package/chalk) style methods.  Example:
 
 ```js
-var cli = require('pixl-cli');
+const cli = require('pixl-cli');
 cli.global();
 
 print( box( bold.red("This is bold, red and in a box!") ) + "\n" );
