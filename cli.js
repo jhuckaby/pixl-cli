@@ -521,6 +521,7 @@ var cli = module.exports = {
 				spinner: ['bold', 'green'],
 				braces: ['gray'],
 				bar: ['bold', 'cyan'],
+				indeterminate: ['gray'],
 				pct: ['bold', 'yellow'],
 				remain: ['green'],
 				text: []
@@ -627,7 +628,7 @@ var cli = module.exports = {
 			}
 			bar += cli.space(args.width - stringWidth(bar));
 			
-			line += cli.applyStyles( bar, args.styles.bar );
+			line += cli.applyStyles( bar, (args.amount === args.max) ? args.styles.indeterminate : args.styles.bar );
 			line += cli.applyStyles( args.braces[1], args.styles.braces );
 			line += " ";
 			

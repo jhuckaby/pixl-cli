@@ -564,6 +564,7 @@ cli.progress.start({
 		spinner: ['bold', 'green'],
 		braces: ['gray'],
 		bar: ['bold', 'cyan'],
+		indeterminate: ['gray'],
 		pct: ['bold', 'yellow'],
 		remain: ['green'],
 		text: [function( text ) { return text.toUpperCase() }]
@@ -572,6 +573,8 @@ cli.progress.start({
 ```
 
 Each key should be set to an array of styles supported by the [chalk](https://www.npmjs.com/package/chalk) module or a function.  These are arrays because each component may contain multiple styles.  For example, by default the `spinner`, `bar` and `pct` are styled with both a color and `bold`.
+
+The `indeterminate` style is applied to the filled portion of the bar when the `amount` is exactly equal to the `max`.  This is to handle cases where a job "sits at 100%" but isn't quite complete, and also handle deliberate intermintate jobs (i.e. your code can just set the `amount` to the `max` to show an interminate bar).  This also hides the time remaining.
 
 ### Automatic Width
 
