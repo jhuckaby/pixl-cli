@@ -33,6 +33,17 @@ var cli = module.exports = {
 		'(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~]))'
 	].join('|'), 'g'),
 	
+	mapArgs: function(aliases) {
+		// apply alias lookup to a set of args
+		// e.g. { 'q':'quiet', 'v':'verbose' }
+		for (var key in aliases) {
+			if (key in this.args) {
+				this.args[ aliases[key] ] = this.args[key];
+				delete this.args[key];
+			}
+		}
+	},
+	
 	tty: function() {
 		// return true if stdout is connected to a TTY, 
 		// i.e. so we can ask the user things

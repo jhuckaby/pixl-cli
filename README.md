@@ -223,6 +223,19 @@ Then `cli.args` will contain:
 
 Please see the [pixl-args](https://www.npmjs.com/package/pixl-args) module documentation for more details.
 
+### Argument Aliases
+
+You can support argument aliases (e.g. `-v` for `--verbose`) by providing a map to the `mapArgs()` function.  Example:
+
+```js
+const cli = require('pixl-cli');
+cli.mapArgs({
+	'v': 'verbose',
+	'q': 'quiet',
+	'd': 'debug'
+});
+```
+
 ### Verbose Mode
 
 The `--verbose` switch has a special meaning.  It is used by the `cli.verbose()` function, and will control whether it outputs anything or not.  `cli.verbose()` works just like `cli.print()` except that it only prints if the `--verbose` switch is present on the command-line.  Example use:
