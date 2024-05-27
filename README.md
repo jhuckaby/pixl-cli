@@ -512,13 +512,13 @@ If you call `cli.progress.update()` and pass in a number, the library assumes yo
 
 ### Temporarily Erasing The Bar
 
-If you need to temporarily erase the progress bar, presumably to write some lines of output to the console, you can call the `cli.progress.erase()` method.  Just note that after `freq` milliseconds (or less), the bar will be redrawn.
+If you need to temporarily erase the progress bar, presumably to write some lines of output to the console, you can call the `cli.progress.erase()` method.  To reduce flickering, you can force a redraw just after outputting your lines by calling `cli.progress.draw()`.
 
-To reduce flickering, you can force a redraw just after outputting your lines by calling `cli.progress.draw()`.  Example:
+However, if you use the built-in CLI `print()`, `println()`, `verbose()` or `verboseln()` functions, the progress bar is automatically hidden and redrawn for you.  You should only need to manually erase and redraw it if you are calling some other code that outputs to STDOUT or STDERR.  Example:
 
 ```js
 cli.progress.erase();
-cli.print("We're now in phase 2 of 3: Updating DB indexes...\n\n");
+console.log( some_large_object );
 cli.progress.draw();
 ```
 

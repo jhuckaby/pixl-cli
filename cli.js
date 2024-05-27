@@ -432,7 +432,11 @@ var cli = module.exports = {
 	
 	print: function(msg) {
 		// print message to console
-		if (!this.args.quiet) process.stdout.write(msg);
+		if (!this.args.quiet) {
+			if (this.progress.running) this.progress.erase();
+			process.stdout.write(msg);
+			if (this.progress.running) this.progress.draw();
+		}
 		this.log(msg);
 	},
 	
@@ -454,7 +458,11 @@ var cli = module.exports = {
 	
 	warn: function(msg) {
 		// print to stderr
-		if (!this.args.quiet) process.stderr.write(msg);
+		if (!this.args.quiet) {
+			if (this.progress.running) this.progress.erase();
+			process.stderr.write(msg);
+			if (this.progress.running) this.progress.draw();
+		}
 		this.log(msg);
 	},
 	
@@ -465,6 +473,7 @@ var cli = module.exports = {
 	
 	die: function(msg) {
 		// print to stderr and exit with non-zero code
+		if (this.progress.running) this.progress.end();
 		this.warn(msg);
 		process.exit(1);
 	},
@@ -596,8 +605,8 @@ var cli = module.exports = {
 		
 		draw: function() {
 			// draw progress bar, spinner
-			if (!cli.tty()) return;
 			if (!this.running) return;
+			if (!cli.tty()) return;
 			
 			var args = this.args;
 			var line = args.indent;
@@ -660,8 +669,8 @@ var cli = module.exports = {
 		},
 		
 		update: function(args) {
-			if (!cli.tty()) return;
 			if (!this.running) return;
+			if (!cli.tty()) return;
 			
 			if (typeof(args) == 'number') {
 				// just updating the amount
@@ -678,6 +687,7 @@ var cli = module.exports = {
 		
 		erase: function() {
 			// erase progress
+			if (!this.running) return;
 			if (!cli.tty()) return;
 			if (this.lastLine && !this.args.quiet) {
 				process.stdout.write( cli.space( stringWidth(this.lastLine) ) + "\r" );
@@ -686,8 +696,8 @@ var cli = module.exports = {
 		
 		end: function(erase) {
 			// end of progress session
-			if (!cli.tty()) return;
 			if (!this.running) return;
+			if (!cli.tty()) return;
 			
 			if (erase !== false) {
 			  this.erase();
@@ -695,6 +705,7 @@ var cli = module.exports = {
 			clearTimeout( this.timer );
 			this.running = false;
 			this.args = {};
+			this.lastLine = '';
 			
 			// restore CLI cursor
 			if (!this.args.quiet) process.stdout.write('\u001b[?25h');
