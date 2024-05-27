@@ -12,6 +12,7 @@
 		+ [TTY Detection](#tty-detection)
 		+ [Other Tools](#other-tools)
 	* [Command-Line Arguments](#command-line-arguments)
+		+ [Argument Aliases](#argument-aliases)
 		+ [Verbose Mode](#verbose-mode)
 		+ [Quiet Mode](#quiet-mode)
 	* [Prompting The User](#prompting-the-user)
@@ -24,6 +25,7 @@
 		+ [Configuration](#configuration)
 		+ [Temporarily Erasing The Bar](#temporarily-erasing-the-bar)
 		+ [Customizing the Look](#customizing-the-look)
+		+ [Indeterminite Progress](#indeterminite-progress)
 		+ [Changing Color Styles](#changing-color-styles)
 		+ [Automatic Width](#automatic-width)
 		+ [Keep progress bar visible](#keep-progress-bar-visible)
@@ -507,6 +509,7 @@ Calls to `cli.progress.start()` and `cli.progress.update()` accept an object con
 | `filling` | An array of characters to use as the bar chunk filling progression. |
 | `filled` | A single character representing one filled bar chunk, defaults to "⣿". |
 | `styles` | A set of color styles to use (see [Changing Color Styles](#changing-color-styles) below). |
+| `pct` | Show percentage (defaults to `true`). |
 
 If you call `cli.progress.update()` and pass in a number, the library assumes you are just updating the `amount`.  However, if you pass in an object, all the specified properties are updated.
 
@@ -554,6 +557,12 @@ cli.progress.start({
 });
 ```
 
+### Indeterminite Progress
+
+For indeterminate progress, simply set the `amount` to the `max`.  If these two values are identical, the progress bar is shown in an "indeterminate" state (e.g. the filled portion of the bar is drawn in a different color, default `gray`).  This is to handle cases where a job "sits at 100%" but isn't quite complete, and also handle deliberate intermintate jobs (i.e. your code can just set the `amount` to the `max` to show an interminate bar).  This also hides the time remaining.
+
+For an additional UI hint, if you know your job is going to be indeterminate from the start, set the `pct` option to `false` to hide the percentage display.  Otherwise it'll show "100%" during indeterminacy.
+
 ### Changing Color Styles
 
 The progress bar uses a set of color styles from the [chalk](https://www.npmjs.com/package/chalk) module or a custom function for the spinner, braces, bar chunks, percentage display, remaining time, and your custom text (if applicable).  To customize these, pass in a `styles` object with the following keys:
@@ -574,7 +583,7 @@ cli.progress.start({
 
 Each key should be set to an array of styles supported by the [chalk](https://www.npmjs.com/package/chalk) module or a function.  These are arrays because each component may contain multiple styles.  For example, by default the `spinner`, `bar` and `pct` are styled with both a color and `bold`.
 
-The `indeterminate` style is applied to the filled portion of the bar when the `amount` is exactly equal to the `max`.  This is to handle cases where a job "sits at 100%" but isn't quite complete, and also handle deliberate intermintate jobs (i.e. your code can just set the `amount` to the `max` to show an interminate bar).  This also hides the time remaining.
+The `indeterminate` style is applied to the filled portion of the bar when the `amount` is exactly equal to the `max`.
 
 ### Automatic Width
 

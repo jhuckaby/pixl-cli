@@ -526,6 +526,7 @@ var cli = module.exports = {
 				remain: ['green'],
 				text: []
 			},
+			pct: true,
 			width: 30,
 			freq: 100,
 			remain: true,
@@ -630,11 +631,13 @@ var cli = module.exports = {
 			
 			line += cli.applyStyles( bar, (args.amount === args.max) ? args.styles.indeterminate : args.styles.bar );
 			line += cli.applyStyles( args.braces[1], args.styles.braces );
-			line += " ";
 			
 			// percentage
-			var pct = cli.pct(args.amount, args.max, true);
-			line += cli.applyStyles( pct, args.styles.pct );
+			if (args.pct) {
+				line += " ";
+				var pct = cli.pct(args.amount, args.max, true);
+				line += cli.applyStyles( pct, args.styles.pct );
+			}
 			
 			// remaining
 			var now = Tools.timeNow();
