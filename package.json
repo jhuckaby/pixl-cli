@@ -26,9 +26,6 @@
 		"pixl-args": "^1.0.0",
 		"pixl-tools": "^2.0.2",
 		"chalk": "2.4.1",
-		"string-width": "4.2.0",
-		"widest-line": "3.0.0",
-		"repeating": "3.0.0",
 		"word-wrap": "1.2.4"
 	},
 	"devDependencies": {}
