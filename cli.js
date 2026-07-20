@@ -6,82 +6,14 @@ var fs = require('fs');
 var readline = require('readline');
 var path = require('path');
 var chalk = require('chalk');
-var wordWrap = require('word-wrap');
 
-// Shared pattern for stripping ANSI terminal escape sequences from measured text.
-var ansiPattern = new RegExp([
-	'[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)',
-	'(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~]))'
-].join('|'), 'g');
+var Util = require('./util');
+var Width = require('./width');
+var wordWrap = require('./wrap');
 
-// Split strings into user-perceived characters, so an emoji sequence occupies one
-// grapheme even when it contains skin tones, variation selectors or ZWJ characters.
-var graphemeSegmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
-
-// These built-in Unicode properties let us identify emoji without carrying a large,
-// generated lookup table.  VS16 changes text-default symbols to emoji presentation.
-var zeroWidthClusterPattern = /^(?:\p{Default_Ignorable_Code_Point}|\p{Control}|\p{Format}|\p{Nonspacing_Mark}|\p{Enclosing_Mark}|\p{Surrogate})+$/u;
-var emojiPattern = /\p{Emoji}/u;
-var emojiPresentationPattern = /\p{Emoji_Presentation}/u;
-var emojiModifierPattern = /\p{Emoji_Modifier}/u;
-var regionalIndicatorPattern = /\p{Regional_Indicator}/gu;
-var extendedPictographicPattern = /\p{Extended_Pictographic}/gu;
-var keycapPattern = /^[\d#*]\uFE0F?\u20E3$/;
-var keycapBaseWithVs16Pattern = /^[\d#*]\uFE0F$/;
-
-function stringWidth(text) {
-	// Measure Western Unicode and emoji terminal columns, ignoring ANSI styling.
-	if ((typeof(text) != 'string') || !text.length) return 0;
-	text = text.replace(ansiPattern, '');
-	if (!text.length) return 0;
-	
-	// Printable ASCII needs no Unicode segmentation and is by far the common case.
-	if (text.match(/^[\u0020-\u007E]*$/)) return text.length;
-	
-	var width = 0;
-	var segments = graphemeSegmenter.segment(text);
-	for (var item of segments) {
-		var segment = item.segment;
-		if (zeroWidthClusterPattern.test(segment)) continue;
-		
-		// Native emoji generally occupy two terminal columns.  The extra checks cover
-		// text-default emoji switched by VS16, flags, keycaps and unqualified sequences.
-		var regionalIndicators = segment.match(regionalIndicatorPattern);
-		var pictographs = segment.match(extendedPictographicPattern);
-		var isEmoji = false;
-		
-		if (segment.includes('\u20E3')) {
-			isEmoji = keycapPattern.test(segment);
-		}
-		else if (regionalIndicators) {
-			isEmoji = (regionalIndicators.length >= 2);
-		}
-		else {
-			isEmoji = emojiPresentationPattern.test(segment) ||
-				(emojiPattern.test(segment) && segment.includes('\uFE0F') &&
-					!keycapBaseWithVs16Pattern.test(segment)) ||
-				(emojiPattern.test(segment) && emojiModifierPattern.test(segment)) ||
-				(segment.includes('\u200D') && pictographs && (pictographs.length >= 2));
-		}
-		
-		width += isEmoji ? 2 : 1;
-	}
-	
-	return width;
-}
-
-function widestLine(text) {
-	// Return the visual width of the widest line in a multi-line string.
-	var width = 0;
-	text.split(/\n/).forEach( function(line) {
-		width = Math.max( width, stringWidth(line) );
-	} );
-	return width;
-}
-
-// Preserve the compatibility aliases provided by the old CommonJS dependencies.
-stringWidth.default = stringWidth;
-widestLine.default = widestLine;
+var ansiPattern = Util.ansiPattern;
+var stringWidth = Width.stringWidth;
+var widestLine = Width.widestLine;
 
 var Tools = require('pixl-tools');
 var Args = require('pixl-args');
