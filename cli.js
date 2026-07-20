@@ -181,6 +181,12 @@ var cli = module.exports = {
 		return text + this.space(width - stringWidth(text));
 	},
 	
+	emoji: function(emoji) {
+		// Draw the emoji, restore its starting cursor position, then explicitly move
+		// forward two cells.  This overrides each terminal's automatic cursor advance.
+		return '\u001b7' + emoji + '\u001b8\u001b[2C';
+	},
+	
 	center: function(text, width) {
 		// center string horizontally
 		var self = this;
