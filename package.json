@@ -22,11 +22,9 @@
 		"table"
 	],
 	"dependencies": {
-		"pixl-class": "^1.0.3",
 		"pixl-args": "^1.0.0",
 		"pixl-tools": "^2.0.2",
-		"chalk": "2.4.1",
-		"word-wrap": "1.2.4"
+		"chalk": "2.4.1"
 	},
 	"devDependencies": {}
 }
