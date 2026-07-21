@@ -288,6 +288,136 @@ var cli = module.exports = {
 		} );
 	},
 	
+	dashGrid: function(rows, args) {
+		// Render a responsive grid of equal-sized dashboard units.  Each unit has a
+		// centered value, a centered label, two blank spacer rows and its own border.
+		var self = this;
+		if (!rows || !rows.length) return '';
+		if (!args) args = {};
+		
+		// Normalize numeric layout options to non-negative whole terminal cells.
+		// Invalid values fall back to their documented defaults.
+		var wholeNumber = function(value, defaultValue, minimum) {
+			value = Math.floor(Number(value));
+			if (!isFinite(value)) value = defaultValue;
+			return Math.max(minimum, value);
+		};
+		
+		var targetUnitWidth = wholeNumber(args.unitWidth, 20, 5);
+		var minCols = wholeNumber(args.minCols, 3, 1);
+		var maxCols = wholeNumber(args.maxCols, 5, 1);
+		var gap = wholeNumber(args.gap, 1, 0);
+		var indent = args.indent || '';
+		if (typeof(indent) == 'number') indent = this.space(indent);
+		
+		// A maximum is a hard cap.  If conflicting limits are supplied, lower the
+		// minimum to match rather than silently exceeding the requested maximum.
+		if (minCols > maxCols) minCols = maxCols;
+		
+		// Empty style arrays are intentional overrides, so property checks are used
+		// instead of ||.  Values are bold, labels and borders are gray by default.
+		var valueStyles = ('valueStyles' in args) ? args.valueStyles : ["bold"];
+		var labelStyles = ('labelStyles' in args) ? args.labelStyles : ["gray"];
+		var borderStyles = ('borderStyles' in args) ? args.borderStyles : ["gray"];
+		
+		// An explicit width makes redirected output and tests deterministic.  When
+		// attached to a terminal, cli.width() returns process.stdout.columns.
+		var layoutWidth = ('width' in args) ?
+			wholeNumber(args.width, 80, 0) : (this.width() || 80);
+		var availableWidth = Math.max(0, layoutWidth - (stringWidth(indent) * 2));
+		if (availableWidth < 2) return '';
+		
+		// Start with the preferred responsive column count, bounded by the caller's
+		// limits and the number of units.  unitWidth is a planning target; the actual
+		// width is calculated below after horizontal gaps have been reserved.
+		var numCols = Math.floor(availableWidth / targetUnitWidth);
+		numCols = Math.max(minCols, Math.min(maxCols, numCols));
+		numCols = Math.min(numCols, rows.length);
+		
+		// Each useful unit needs five cells: two borders, two padding cells and one
+		// content cell.  On a very narrow terminal, safety takes priority over the
+		// requested minimum column count so the grid never overflows.
+		var maxFittingCols = Math.floor((availableWidth + gap) / (5 + gap));
+		maxFittingCols = Math.max(1, maxFittingCols);
+		numCols = Math.max(1, Math.min(numCols, maxFittingCols));
+		
+		// All units use the same exact outer width.  Any indivisible remainder stays
+		// unused at the right edge, including on incomplete final rows.
+		var unitWidth = Math.floor(
+			(availableWidth - ((numCols - 1) * gap)) / numCols
+		);
+		if (unitWidth < 2) return '';
+		
+		var innerWidth = unitWidth - 2;
+		var contentWidth = Math.max(0, innerWidth - 2);
+		
+		var truncate = function(text) {
+			// Preserve ANSI styles, complete graphemes and cli.emoji() sequences.
+			if (contentWidth < 1) return '';
+			return (stringWidth(text) > contentWidth) ?
+				Width.truncate(text, contentWidth, '…') : text;
+		};
+		
+		var centerCell = function(text) {
+			// Center by terminal display width rather than JavaScript string length.
+			var remain = Math.max(0, innerWidth - stringWidth(text));
+			var left = Math.floor(remain / 2);
+			return self.space(left) + text + self.space(remain - left);
+		};
+		
+		var units = rows.map( function(row) {
+			var label = ('' + row[0]).replace(/\r?\n/g, ' ');
+			var value = ('' + row[1]).replace(/\r?\n/g, ' ');
+			return {
+				label: self.applyStyles(label, labelStyles),
+				value: self.applyStyles(value, valueStyles)
+			};
+		} );
+		
+		var renderUnit = function(unit) {
+			// The interior layout is: blank, value, blank, label.
+			var top = self.applyStyles(
+				'┌' + self.repeat('─', innerWidth) + '┐', borderStyles
+			);
+			var bottom = self.applyStyles(
+				'└' + self.repeat('─', innerWidth) + '┘', borderStyles
+			);
+			var leftBorder = self.applyStyles('│', borderStyles);
+			var rightBorder = self.applyStyles('│', borderStyles);
+			var blank = leftBorder + self.space(innerWidth) + rightBorder;
+			
+			return [
+				top,
+				// blank,
+				leftBorder + centerCell(truncate(unit.value)) + rightBorder,
+				blank,
+				leftBorder + centerCell(truncate(unit.label)) + rightBorder,
+				bottom
+			];
+		};
+		
+		var output = [];
+		for (var rowIdx = 0; rowIdx < units.length; rowIdx += numCols) {
+			var gridRow = units.slice(rowIdx, rowIdx + numCols).map(renderUnit);
+			
+			// Join corresponding lines from each unit to form one complete grid row.
+			for (var lineIdx = 0; lineIdx < 6; lineIdx++) {
+				output.push(
+					indent + gridRow.map( function(unit) {
+						return unit[lineIdx];
+					} ).join(self.space(gap))
+				);
+			}
+			
+			// The same gap controls vertical blank lines between rows of units.
+			if (rowIdx + numCols < units.length) {
+				for (var gapIdx = 0; gapIdx < gap; gapIdx++) output.push('');
+			}
+		}
+		
+		return output.join("\n");
+	},
+	
 	applyStyles: function(text, styles) {
 		// apply one or more chalk styles or functions to text string
 		if (!styles) return text;
@@ -578,7 +708,7 @@ var cli = module.exports = {
 		global.Tools = Tools;
 		
 		// bind wrap functions
-		["prompt", "yesno", "table", "box", "defList", "wrap", "center", "print", "println", "verbose", "verboseln", "warn", "warnln", "die", "dieln", "loadFile", "saveFile", "appendFile"].forEach( function(func) {
+		["prompt", "yesno", "table", "box", "defList", "dashGrid", "wrap", "center", "print", "println", "verbose", "verboseln", "warn", "warnln", "die", "dieln", "loadFile", "saveFile", "appendFile"].forEach( function(func) {
 			global[func] = self[func].bind(self);
 		} );
 		

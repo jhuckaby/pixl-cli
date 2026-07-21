@@ -449,6 +449,54 @@ You can customize the definition list with these options:
 | `hspace` | Spaces between the content and each side of the box.  Defaults to `1`. |
 | `vspace` | Empty lines above and below the list inside the box.  Defaults to `0`. |
 
+## Displaying Dashboard Grids
+
+Call `cli.dashGrid()` to render a responsive grid of dashboard units.  Each unit contains a centered value and label, and all units have the same dimensions regardless of their content.  Pass an array of `[label, value]` pairs:
+
+```js
+const cli = require('pixl-cli');
+
+cli.println( cli.dashGrid([
+	[ "Conductors", 1 ],
+	[ "Servers", 2 ],
+	[ "Current Alerts", 0 ],
+	[ "Active Jobs", 0 ],
+	[ "Job Success Rate", "100%" ],
+	[ "Avg. Job Elapsed", "31 sec" ]
+], {
+	minCols: 3,
+	maxCols: 5,
+	gap: 1,
+	valueStyles: ["bold", "green"]
+}) );
+```
+
+At a width of 62 columns, the first row looks like this:
+
+```
+┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐
+│        1         │ │        2         │ │        0         │
+│                  │ │                  │ │                  │
+│    Conductors    │ │     Servers      │ │  Current Alerts  │
+└──────────────────┘ └──────────────────┘ └──────────────────┘
+```
+
+The grid uses the current terminal width and flows additional units onto new rows.  An incomplete final row ends after its last unit.  Labels and values are limited to one line and automatically shortened with an ellipsis when necessary.  ANSI styles and emoji are measured by their terminal display width.
+
+You can customize the dashboard grid with these options:
+
+| Property Name | Description |
+|---------------|-------------|
+| `width` | Overall layout width, including horizontal margins.  Defaults to `cli.width()`, or `80` when no terminal width is available. |
+| `unitWidth` | Target outer width used to select the responsive column count.  Defaults to `20`. |
+| `minCols` | Preferred minimum number of columns.  Defaults to `3`.  Extremely narrow terminals may use fewer to avoid overflow. |
+| `maxCols` | Maximum number of columns.  Defaults to `5`. |
+| `gap` | Horizontal spaces between units and blank lines between grid rows.  Defaults to `1`. |
+| `indent` | Horizontal margin in characters on both sides of the grid.  Defaults to `0`. |
+| `valueStyles` | An array of [chalk](https://www.npmjs.com/package/chalk) styles or functions for values.  Defaults to `["bold"]`. |
+| `labelStyles` | An array of styles or functions for labels.  Defaults to `["gray"]`. |
+| `borderStyles` | An array of styles or functions for unit borders.  Defaults to `["gray"]`. |
+
 ## Displaying Tables
 
 ![Table Example](https://pixlcore.com/software/pixl-cli/table.png)
@@ -739,6 +787,7 @@ The full list of methods and objects that are imported are:
 - `table()`
 - `box()`
 - `defList()`
+- `dashGrid()`
 - `wrap()`
 - `center()`
 - `commify()`
