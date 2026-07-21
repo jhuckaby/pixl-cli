@@ -197,6 +197,97 @@ var cli = module.exports = {
 		return output.join("\n");
 	},
 	
+	defList: function(rows, args) {
+		// Render a two-column definition list inside a box.  The labels share a
+		// common width, but there is deliberately no border between the columns.
+		var self = this;
+		if (!args) args = {};
+		
+		// Empty arrays are valid style overrides, so test for the property rather
+		// than using || here.  Labels are bold by default and values are plain.
+		var labelStyles = ('labelStyles' in args) ? args.labelStyles : ["bold"];
+		var textStyles = ('textStyles' in args) ? args.textStyles : [];
+		var borderStyles = ('borderStyles' in args) ? args.borderStyles :
+			(('styles' in args) ? args.styles : ["gray"]);
+		var hspace = ('hspace' in args) ? args.hspace : 1;
+		var vspace = args.vspace || 0;
+		
+		// Gaps are whole terminal cells.  Invalid and negative values become zero.
+		var gap = ('gap' in args) ? Math.floor(Number(args.gap)) : 1;
+		if (!isFinite(gap) || (gap < 0)) gap = 0;
+		var indent = args.indent || "";
+		if (typeof(indent) == 'number') indent = this.space(indent);
+		
+		// Normalize and style all cells before measuring them.  This allows ANSI
+		// color, custom style functions and the cli.emoji() cursor hack to coexist
+		// with the display-width calculations below.
+		var items = (rows || []).map( function(row) {
+			var label = '' + row[0];
+			var value = '' + row[1];
+			
+			// Definition lists are one item per line.  Flatten accidental newlines so
+			// a cell cannot escape its row and disturb the surrounding box.
+			label = label.replace(/\r?\n/g, ' ').replace(/\s+$/, '');
+			value = value.replace(/\r?\n/g, ' ');
+			if (!label.replace(ansiPattern, '').match(/:$/)) label += ':';
+			
+			return {
+				label: self.applyStyles(label, labelStyles),
+				value: self.applyStyles(value, textStyles)
+			};
+		} );
+		
+		var labelWidth = 0;
+		var valueWidth = 0;
+		
+		items.forEach( function(item) {
+			labelWidth = Math.max( labelWidth, stringWidth(item.label) );
+			valueWidth = Math.max( valueWidth, stringWidth(item.value) );
+		} );
+		
+		// The indent acts as a horizontal margin, so reserve it on both sides.
+		// Also reserve both box borders, both padding areas, and the requested gap
+		// separating the label and value columns.
+		var terminalWidth = this.width();
+		var contentWidth = labelWidth + gap + valueWidth;
+		
+		if (terminalWidth) {
+			var availableWidth = terminalWidth - (stringWidth(indent) * 2);
+			var availableContentWidth = Math.max(0, availableWidth - 2 - (hspace * 2));
+			contentWidth = Math.min(contentWidth, availableContentWidth);
+		}
+		
+		// Keep the complete label column whenever possible, and give all remaining
+		// room to values.  On extremely narrow terminals labels are shortened too,
+		// while still reserving one cell for a value when any room remains.
+		if (labelWidth + gap + 1 > contentWidth) {
+			labelWidth = Math.max(0, contentWidth - gap - 1);
+		}
+		valueWidth = Math.max(0, contentWidth - labelWidth - (labelWidth ? gap : 0));
+		
+		var truncate = function(text, width) {
+			// Width.truncate() preserves ANSI resets and complete emoji graphemes.
+			if (width < 1) return '';
+			return (stringWidth(text) > width) ? Width.truncate(text, width, '…') : text;
+		};
+		
+		var lines = items.map( function(item) {
+			var label = truncate(item.label, labelWidth);
+			var value = truncate(item.value, valueWidth);
+			if (!labelWidth) return value;
+			return self.pad(label, labelWidth) + self.space(gap) + value;
+		} );
+		
+		// Let box() handle the border, padding, vertical spacing and final row
+		// padding.  Passing the normalized indent keeps numeric margins consistent.
+		return this.box( lines.join("\n"), {
+			styles: borderStyles,
+			hspace: hspace,
+			vspace: vspace,
+			indent: indent
+		} );
+	},
+	
 	applyStyles: function(text, styles) {
 		// apply one or more chalk styles or functions to text string
 		if (!styles) return text;
@@ -487,7 +578,7 @@ var cli = module.exports = {
 		global.Tools = Tools;
 		
 		// bind wrap functions
-		["prompt", "yesno", "table", "box", "wrap", "center", "print", "println", "verbose", "verboseln", "warn", "warnln", "die", "dieln", "loadFile", "saveFile", "appendFile"].forEach( function(func) {
+		["prompt", "yesno", "table", "box", "defList", "wrap", "center", "print", "println", "verbose", "verboseln", "warn", "warnln", "die", "dieln", "loadFile", "saveFile", "appendFile"].forEach( function(func) {
 			global[func] = self[func].bind(self);
 		} );
 		

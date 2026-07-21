@@ -398,6 +398,57 @@ culpa qui officia deserunt mollit anim
 id est laborum.
 ```
 
+## Displaying Definition Lists
+
+Call `cli.defList()` to render a two-column list of labels and values inside a box.  Labels are bold by default, values are plain, and no vertical border is drawn between the columns.  Colons are added to labels automatically when needed.  Lines will automatically truncate with ellipsis as needed.
+
+```js
+const cli = require('pixl-cli');
+
+let event = {
+	id: "emm2wtlsxrtjz8v4",
+	title: "Simple Shell Test",
+	category: "general",
+	username: "admin"
+};
+
+cli.println( cli.defList([
+	[ "Event ID", event.id ],
+	[ "Title", event.title ],
+	[ "Category", event.category ],
+	[ "Author", event.username ]
+], {
+	labelStyles: ["yellow", "bold"],
+	textStyles: ["green"],
+	indent: 1
+}) );
+```
+
+This produces a definition list like this, with colors when the terminal supports them:
+
+```
+ ┌─────────────────────────────┐
+ │ Event ID: emm2wtlsxrtjz8v4  │
+ │ Title:    Simple Shell Test │
+ │ Category: general           │
+ │ Author:   admin             │
+ └─────────────────────────────┘
+```
+
+The label and value columns are left-aligned.  When the box would exceed the attached terminal width, long values are shortened with an ellipsis.  The complete label column is preserved whenever possible.  The `indent` is treated as a horizontal margin on both sides when calculating the available width.
+
+You can customize the definition list with these options:
+
+| Property Name | Description |
+|---------------|-------------|
+| `labelStyles` | An array of [chalk](https://www.npmjs.com/package/chalk) styles or functions for labels.  Defaults to `["bold"]`. |
+| `textStyles` | An array of styles or functions for values.  Defaults to `[]`. |
+| `borderStyles` | An array of styles or functions for the box border.  Defaults to `["gray"]`. |
+| `indent` | Horizontal margin in characters on both sides of the box.  Defaults to `0`. |
+| `gap` | Spaces between the label and value columns.  Defaults to `1`. |
+| `hspace` | Spaces between the content and each side of the box.  Defaults to `1`. |
+| `vspace` | Empty lines above and below the list inside the box.  Defaults to `0`. |
+
 ## Displaying Tables
 
 ![Table Example](https://pixlcore.com/software/pixl-cli/table.png)
@@ -687,6 +738,7 @@ The full list of methods and objects that are imported are:
 - `yesno()`
 - `table()`
 - `box()`
+- `defList()`
 - `wrap()`
 - `center()`
 - `commify()`

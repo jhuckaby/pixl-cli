@@ -79,6 +79,26 @@ function truncate(text, width, suffix) {
 	var units = Util.splitAnsiGraphemes(text);
 	var trailingAnsi = [];
 	
+	// cli.emoji() surrounds one grapheme with cursor save, restore and movement
+	// sequences.  Treat this entire construct as one display unit so truncation
+	// can never keep the save sequence while discarding its matching restore.
+	for (var idx = 0; idx <= units.length - 4; idx++) {
+		if (
+			units[idx].ansi && (units[idx].text === '\u001b7') &&
+			!units[idx + 1].ansi &&
+			units[idx + 2].ansi && (units[idx + 2].text === '\u001b8') &&
+			units[idx + 3].ansi && (units[idx + 3].text === '\u001b[2C')
+		) {
+			var emojiUnit = units.slice(idx, idx + 4).map( function(unit) {
+				return unit.text;
+			} ).join('');
+			units.splice(idx, 4, {
+				text: emojiUnit,
+				ansi: false
+			});
+		}
+	}
+	
 	for (var idx = units.length - 1; idx >= 0; idx--) {
 		if (!units[idx].ansi) break;
 		if (units[idx].text.match(/^(?:\u001B\[|\u009B)[^m]*m$/)) {
