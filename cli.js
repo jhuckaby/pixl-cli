@@ -298,25 +298,12 @@ var cli = module.exports = {
 			max_col_widths[longest_col_idx]--;
 		}
 		
-		// finally prune affected columns, trying to preserve ANSI color inside column value
+		// finally prune affected columns by display width, preserving ANSI and emoji
 		rows.forEach( function(cols, idx) {
 			cols.forEach( function(col, idy) {
 				col = '' + col;
 				if (stringWidth(col) > max_col_widths[idy]) {
-					var suffix = '';
-					var prefix = '';
-					
-					while (col.match(/^(\u001b\[[^m]*?m)/)) {
-						prefix += RegExp.$1;
-						col = col.replace(/^(\u001b\[[^m]*?m)/, '');
-					}
-					
-					while (col.match(/(\u001b\[[^m]*?m)$/)) {
-						suffix = RegExp.$1 + suffix;
-						col = col.replace(/(\u001b\[[^m]*?m)$/, '');
-					}
-					
-					cols[idy] = prefix + col.substring(0, max_col_widths[idy] - 1) + '…' + suffix;
+					cols[idy] = Width.truncate(col, max_col_widths[idy], '…');
 				} // too wide
 			});
 		});

@@ -65,11 +65,52 @@ function widestLine(text) {
 	return width;
 }
 
+function truncate(text, width, suffix) {
+	// Truncate a string to an exact terminal display width.  Preserve complete ANSI
+	// sequences and grapheme clusters, and retain trailing SGR codes to reset styles.
+	if (typeof(text) != 'string') text = '' + text;
+	if (suffix == null) suffix = '';
+	if (stringWidth(text) <= width) return text;
+	
+	var suffixWidth = stringWidth(suffix);
+	var contentWidth = Math.max(0, width - suffixWidth);
+	var outputWidth = 0;
+	var output = '';
+	var units = Util.splitAnsiGraphemes(text);
+	var trailingAnsi = [];
+	
+	for (var idx = units.length - 1; idx >= 0; idx--) {
+		if (!units[idx].ansi) break;
+		if (units[idx].text.match(/^(?:\u001B\[|\u009B)[^m]*m$/)) {
+			trailingAnsi.unshift(units[idx].text);
+		}
+	}
+	
+	for (var idx = 0, len = units.length; idx < len; idx++) {
+		var unit = units[idx];
+		if (unit.ansi) {
+			output += unit.text;
+			continue;
+		}
+		
+		var unitWidth = stringWidth(unit.text);
+		if ((outputWidth + unitWidth) > contentWidth) break;
+		output += unit.text;
+		outputWidth += unitWidth;
+	}
+	
+	// A wide grapheme may not fit the final available cell.  Pad that cell so the
+	// ellipsis still lands at the exact requested width and tables remain aligned.
+	if (outputWidth < contentWidth) output += ' '.repeat(contentWidth - outputWidth);
+	return output + suffix + trailingAnsi.join('');
+}
+
 // Preserve the compatibility aliases provided by the old CommonJS dependencies.
 stringWidth.default = stringWidth;
 widestLine.default = widestLine;
 
 module.exports = {
 	stringWidth: stringWidth,
-	widestLine: widestLine
+	widestLine: widestLine,
+	truncate: truncate
 };

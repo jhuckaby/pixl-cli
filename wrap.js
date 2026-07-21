@@ -2,34 +2,15 @@
 
 var Util = require('./util');
 var stringWidth = require('./width').stringWidth;
-var ansiPattern = Util.ansiPattern;
-var graphemeSegmenter = Util.graphemeSegmenter;
 
 function getWrapTokens(text) {
 	// Split text into alternating words and breakable whitespace, while preserving
 	// ANSI sequences as zero-width units in their original positions.
-	var units = [];
-	var pattern = new RegExp(ansiPattern.source, 'g');
-	var offset = 0;
-	var match = null;
-	
-	var addText = function(value) {
-		for (var item of graphemeSegmenter.segment(value)) {
-			units.push({
-				text: item.segment,
-				width: stringWidth(item.segment),
-				breakable: !!item.segment.match(/^(?:\s|\u200B)+$/u),
-				ansi: false
-			});
-		}
-	};
-	
-	while ((match = pattern.exec(text))) {
-		if (match.index > offset) addText( text.substring(offset, match.index) );
-		units.push({ text: match[0], width: 0, breakable: false, ansi: true });
-		offset = pattern.lastIndex;
-	}
-	if (offset < text.length) addText( text.substring(offset) );
+	var units = Util.splitAnsiGraphemes(text);
+	units.forEach( function(unit) {
+		unit.width = unit.ansi ? 0 : stringWidth(unit.text);
+		unit.breakable = !unit.ansi && !!unit.text.match(/^(?:\s|\u200B)+$/u);
+	} );
 	
 	var tokens = [];
 	var token = null;
