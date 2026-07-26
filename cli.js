@@ -290,7 +290,7 @@ var cli = module.exports = {
 	
 	dashGrid: function(rows, args) {
 		// Render a responsive grid of equal-sized dashboard units.  Each unit has a
-		// centered value, a centered label, two blank spacer rows and its own border.
+		// centered value, a centered label, a blank spacer row and its own border.
 		var self = this;
 		if (!rows || !rows.length) return '';
 		if (!args) args = {};
@@ -375,7 +375,7 @@ var cli = module.exports = {
 		} );
 		
 		var renderUnit = function(unit) {
-			// The interior layout is: blank, value, blank, label.
+			// The interior layout is: value, blank, label.
 			var top = self.applyStyles(
 				'┌' + self.repeat('─', innerWidth) + '┐', borderStyles
 			);
@@ -388,7 +388,6 @@ var cli = module.exports = {
 			
 			return [
 				top,
-				// blank,
 				leftBorder + centerCell(truncate(unit.value)) + rightBorder,
 				blank,
 				leftBorder + centerCell(truncate(unit.label)) + rightBorder,
@@ -401,7 +400,7 @@ var cli = module.exports = {
 			var gridRow = units.slice(rowIdx, rowIdx + numCols).map(renderUnit);
 			
 			// Join corresponding lines from each unit to form one complete grid row.
-			for (var lineIdx = 0; lineIdx < 6; lineIdx++) {
+			for (var lineIdx = 0; lineIdx < gridRow[0].length; lineIdx++) {
 				output.push(
 					indent + gridRow.map( function(unit) {
 						return unit[lineIdx];
@@ -409,9 +408,10 @@ var cli = module.exports = {
 				);
 			}
 			
-			// The same gap controls vertical blank lines between rows of units.
+			// Adjacent text lines already provide one row of vertical separation, so
+			// subtract one when translating the horizontal gap into blank lines.
 			if (rowIdx + numCols < units.length) {
-				for (var gapIdx = 0; gapIdx < gap; gapIdx++) output.push('');
+				for (var gapIdx = 0; gapIdx < Math.max(0, gap - 1); gapIdx++) output.push('');
 			}
 		}
 		

@@ -20,6 +20,8 @@
 	* [Displaying Info Boxes](#displaying-info-boxes)
 		+ [Centering Text](#centering-text)
 		+ [Word-Wrapping Text](#word-wrapping-text)
+	* [Displaying Definition Lists](#displaying-definition-lists)
+	* [Displaying Dashboard Grids](#displaying-dashboard-grids)
 	* [Displaying Tables](#displaying-tables)
 	* [Graphical Progress Bars](#graphical-progress-bars)
 		+ [Configuration](#configuration)
@@ -491,7 +493,7 @@ You can customize the dashboard grid with these options:
 | `unitWidth` | Target outer width used to select the responsive column count.  Defaults to `20`. |
 | `minCols` | Preferred minimum number of columns.  Defaults to `3`.  Extremely narrow terminals may use fewer to avoid overflow. |
 | `maxCols` | Maximum number of columns.  Defaults to `5`. |
-| `gap` | Horizontal spaces between units and blank lines between grid rows.  Defaults to `1`. |
+| `gap` | Horizontal spaces between units.  Grid rows use `gap - 1` blank lines.  Defaults to `1`, producing no vertical blank line. |
 | `indent` | Horizontal margin in characters on both sides of the grid.  Defaults to `0`. |
 | `valueStyles` | An array of [chalk](https://www.npmjs.com/package/chalk) styles or functions for values.  Defaults to `["bold"]`. |
 | `labelStyles` | An array of styles or functions for labels.  Defaults to `["gray"]`. |
