@@ -32,8 +32,36 @@ function splitAnsiGraphemes(text) {
 	return units;
 }
 
+function preserveAnsiLineStyles(text) {
+	// A styled multi-line string normally relies on terminal modes carrying across
+	// newline characters.  Callers such as cli.box() insert independently styled
+	// borders between those lines, whose reset codes can cancel the content styles.
+	// Close all modes at each line ending, then restore the exact SGR state after the
+	// next border by replaying the original SGR history at the next line's start.
+	var lines = text.split('\n');
+	if (lines.length < 2) return text;
+	
+	var sgrHistory = '';
+	var sgrPattern = /^(?:\u001B\[|\u009B)[0-9:;]*m$/;
+	var reset = '\u001b[0m';
+	
+	return lines.map( function(line, idx) {
+		var reopen = sgrHistory;
+		
+		// Only sequences from the original text enter the history.  Synthetic reset
+		// and replay sequences added here must not accumulate on subsequent lines.
+		splitAnsiGraphemes(line).forEach( function(unit) {
+			if (unit.ansi && unit.text.match(sgrPattern)) sgrHistory += unit.text;
+		} );
+		
+		if ((idx < lines.length - 1) && sgrHistory) line += reset;
+		return reopen + line;
+	} ).join('\n');
+}
+
 module.exports = {
 	ansiPattern: ansiPattern,
 	graphemeSegmenter: graphemeSegmenter,
-	splitAnsiGraphemes: splitAnsiGraphemes
+	splitAnsiGraphemes: splitAnsiGraphemes,
+	preserveAnsiLineStyles: preserveAnsiLineStyles
 };

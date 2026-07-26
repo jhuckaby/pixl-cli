@@ -176,7 +176,11 @@ var cli = module.exports = {
 		output.push( indent + this.applyStyles("┌" + this.repeat("─", width) + "┐", styles) );
 		
 		// left, content, right
-		var lines = text.split(/\n/);
+		// Styled text normally carries its SGR modes across newlines, but the styled
+		// right border resets those modes before the next content line.  Make each
+		// line self-contained before inserting borders between them.
+		var safeText = (styles && styles.length) ? Util.preserveAnsiLineStyles(text) : text;
+		var lines = safeText.split(/\n/);
 		while (vspace-- > 0) {
 			lines.unshift( "" );
 			lines.push( "" );
