@@ -937,6 +937,9 @@ var cli = module.exports = {
 	
 };
 
+// Mix in optional renderers which depend on the core CLI helpers above.
+Tools.mergeHashInto( cli, require('./chart.js') );
+
 // import some common utilities
 ["getTextFromBytes", "commify", "shortFloat", "pct", "zeroPad", "getTextFromSeconds", "getNiceRemainingTime", "pluralize", "ucfirst"].forEach( function(func) {
 	module.exports[func] = Tools[func].bind(Tools);

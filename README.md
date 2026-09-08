@@ -22,6 +22,7 @@
 		+ [Word-Wrapping Text](#word-wrapping-text)
 	* [Displaying Definition Lists](#displaying-definition-lists)
 	* [Displaying Dashboard Grids](#displaying-dashboard-grids)
+	* [Displaying Timeseries Charts](#displaying-timeseries-charts)
 	* [Displaying Tables](#displaying-tables)
 	* [Graphical Progress Bars](#graphical-progress-bars)
 		+ [Configuration](#configuration)
@@ -41,7 +42,7 @@
 
 # Overview
 
-This module provides utilities for creating command-line Node.js apps.  Features include automatic parsing of command-line args into simple key/value pairs, prompting the user for information, and displaying graphical info boxes and progress bars.
+This module provides utilities for creating command-line Node.js apps.  Features include automatic parsing of command-line args into simple key/value pairs, prompting the user for information, and displaying graphical info boxes, tables, timeseries charts, and progress bars.
 
 # Usage
 
@@ -498,6 +499,57 @@ You can customize the dashboard grid with these options:
 | `valueStyles` | An array of [chalk](https://www.npmjs.com/package/chalk) styles or functions for values.  Defaults to `["bold"]`. |
 | `labelStyles` | An array of styles or functions for labels.  Defaults to `["gray"]`. |
 | `borderStyles` | An array of styles or functions for unit borders.  Defaults to `["gray"]`. |
+
+## Displaying Timeseries Charts
+
+Call `cli.chart()` to render a filled timeseries area chart using Unicode Braille characters.  Each character contains two horizontal samples and four vertical dots, which gives the chart more detail than ordinary text cells can provide.
+
+Pass the chart an array of objects containing an `x` Epoch timestamp in seconds and a numeric `y` value:
+
+```js
+const cli = require('pixl-cli');
+
+cli.println( cli.chart({
+	title: "App Requests per sec",
+	dataType: "integer",
+	dataSuffix: "/sec",
+	height: 14,
+	indent: 1,
+	color: "green",
+	data: [
+		{ x: 1634269860, y: 39 },
+		{ x: 1634269920, y: 42 },
+		{ x: 1634269980, y: 53 },
+		{ x: 1634270040, y: 40 },
+		{ x: 1634270100, y: 81 },
+		{ x: 1634270160, y: 43 }
+	]
+}) );
+```
+
+The chart automatically fills the available terminal width.  The `indent` option reserves the same horizontal margin on both sides, and defaults to one character.  An explicit `width` is useful for tests and redirected output, where a terminal width may not be available.
+
+The Y axis always starts at zero and ends at the highest data value.  Set `minVertScale` to enforce a minimum upper bound, such as `100` for a CPU percentage chart.  The two Y-axis labels are drawn inside the frame, while the first and last timestamps are shown below it using the current system locale and time zone.
+
+Sparse datasets are smoothed using monotone cubic interpolation.  Dense datasets are reduced to two samples per Braille character using linear interpolation.  A single sample produces axis labels without chart data, and an empty dataset produces only the frame.
+
+You can customize the chart with these options:
+
+| Property Name | Description |
+|---------------|-------------|
+| `data` | Array of `{ x, y }` samples.  The `x` values must be Epoch timestamps in seconds.  Defaults to `[]`. |
+| `title` | Optional title displayed above the frame. |
+| `width` | Overall layout width, including horizontal margins.  Defaults to `cli.width()`, or `80` when no terminal width is available. |
+| `height` | Number of Braille rows inside the frame.  Defaults to `14`, with a minimum of `2`. |
+| `indent` | Horizontal margin in characters on both sides of the chart.  Defaults to `1`. |
+| `dataType` | Y-axis format: `integer`, `float`, `bytes`, `seconds`, or `milliseconds`.  Defaults to `integer`. |
+| `dataSuffix` | Optional text appended to both Y-axis labels.  Defaults to an empty string. |
+| `floatPrecision` | Maximum decimal precision used by compact value formats.  Defaults to `2`. |
+| `minVertScale` | Minimum value for the top of the Y axis.  Defaults to `0`. |
+| `color` | Chalk style name, style function, or array of styles for the chart data.  Defaults to no style. |
+| `borderStyles` | Array of styles or functions for the frame.  Defaults to `["gray"]`. |
+| `labelStyles` | Array of styles or functions for both axes.  Defaults to `["gray"]`. |
+| `titleStyles` | Array of styles or functions for the title.  Defaults to `["cyan", "bold"]`. |
 
 ## Displaying Tables
 
