@@ -502,6 +502,8 @@ You can customize the dashboard grid with these options:
 
 ## Displaying Timeseries Charts
 
+![Chart Example](https://pixlcore.com/software/pixl-cli/chart.png)
+
 Call `cli.chart()` to render a filled timeseries area chart using Unicode Braille characters.  Each character contains two horizontal samples and four vertical dots, which gives the chart more detail than ordinary text cells can provide.
 
 Pass the chart an array of objects containing an `x` Epoch timestamp in seconds and a numeric `y` value:
