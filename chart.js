@@ -54,6 +54,35 @@ function prepareData(data) {
 	return uniqueRows;
 }
 
+function applyDelta(rows, args) {
+	// Match pixl-chart's delta preprocessing exactly.  Work backward so each
+	// subtraction still sees the unmodified value from the previous sample.
+	if (!args.delta || !rows.length) return;
+	var deltaMinValue = false;
+	if (('deltaMinValue' in args) && (args.deltaMinValue !== false)) {
+		deltaMinValue = Number(args.deltaMinValue);
+		if (!isFinite(deltaMinValue)) deltaMinValue = false;
+	}
+	
+	for (var idx = rows.length - 1; idx >= 1; idx--) {
+		rows[idx].y -= rows[idx - 1].y;
+		
+		// Clamp the raw delta before converting it into a rate.  This ordering is
+		// important when deltaMinValue and divideByDelta are both enabled.
+		if ((deltaMinValue !== false) && (rows[idx].y < deltaMinValue)) {
+			rows[idx].y = deltaMinValue;
+		}
+		if (args.divideByDelta) {
+			rows[idx].y /= ((rows[idx].x - rows[idx - 1].x) || 1);
+		}
+	}
+	
+	// There is no preceding value for the first sample.  pixl-chart fills this
+	// gap by copying the second computed delta, keeping the original time range.
+	rows[0].y = 0;
+	if (rows.length > 1) rows[0].y = rows[1].y;
+}
+
 function createLinearInterpolant(xs, ys) {
 	// Create a simple piecewise-linear interpolator for reducing large datasets.
 	// This samples the complete time range uniformly into the available dots.
@@ -361,6 +390,7 @@ module.exports = {
 		var labelStyles = styleList(args.labelStyles, ['gray']);
 		var titleStyles = styleList(args.titleStyles, ['cyan', 'bold']);
 		var rows = prepareData( Array.isArray(args.data) ? args.data : [] );
+		applyDelta(rows, args);
 		var dataType = args.dataType || 'integer';
 		var dataSuffix = args.dataSuffix || '';
 		var floatPrecision = wholeNumber(args.floatPrecision, 2, 1);

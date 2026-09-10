@@ -535,6 +535,8 @@ The Y axis always starts at zero and ends at the highest data value.  Set `minVe
 
 Sparse datasets are smoothed using monotone cubic interpolation.  Dense datasets are reduced to two samples per Braille character using linear interpolation.  A single sample produces axis labels without chart data, and an empty dataset produces only the frame.
 
+Set `delta` to `true` to graph the difference between each sample and the one before it.  This is useful for counters that accumulate over time.  The first sample copies the second sample's computed delta so the chart still covers the complete time range.  Set `deltaMinValue` to a number such as `0` to clamp raw deltas before rendering.  Set `divideByDelta` to `true` to divide each delta by the number of seconds between its current and previous timestamps, producing a per-second rate.
+
 You can customize the chart with these options:
 
 | Property Name | Description |
@@ -548,6 +550,9 @@ You can customize the chart with these options:
 | `dataSuffix` | Optional text appended to both Y-axis labels.  Defaults to an empty string. |
 | `floatPrecision` | Maximum decimal precision used by compact value formats.  Defaults to `2`. |
 | `minVertScale` | Minimum value for the top of the Y axis.  Defaults to `0`. |
+| `delta` | Render each Y value as its difference from the previous sample.  Defaults to `false`. |
+| `deltaMinValue` | Optional minimum for computed delta values, commonly `0`.  Defaults to `false`, which disables clamping. |
+| `divideByDelta` | Divide each computed delta by its elapsed time in seconds.  Defaults to `false`. |
 | `color` | Chalk style name, style function, or array of styles for the chart data.  Defaults to no style. |
 | `borderStyles` | Array of styles or functions for the frame.  Defaults to `["gray"]`. |
 | `labelStyles` | Array of styles or functions for both axes.  Defaults to `["gray"]`. |
