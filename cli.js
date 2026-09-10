@@ -824,6 +824,53 @@ var cli = module.exports = {
 			}
 		},
 		
+		bar: function(overrides) {
+			// return simple bar by itself, no progress, no spinner
+			var args = Tools.copyHash( this.defaults );
+			Tools.mergeHashInto( args, overrides || {} );
+			
+			if (!args.amount) args.amount = 0;
+			if (!args.max) args.max = 1.0;
+			
+			// no color?  wipe all chalk styles
+			if (!args.color) args.styles = {};
+			
+			// ascii mode?  copy over safe chars
+			if (!args.unicode) {
+				Tools.mergeHashInto( args, this.asciiOverrides );
+			}
+			
+			// make sure indent doesn't contain a hard tab
+			if (typeof(args.indent) == 'number') args.indent = cli.space(args.indent);
+			args.indent = args.indent.replace(/\t/g, "    ");
+			
+			var line = args.indent;
+			
+			// progress bar
+			line += cli.applyStyles( args.braces[0], args.styles.braces );
+			var bar = "";
+			var width = Math.max(0, Math.min(args.amount / args.max, 1.0)) * args.width;
+			var partial = width - Math.floor(width);
+			
+			bar += cli.repeat(args.filled, Math.floor(width));
+			if (partial > 0) {
+				bar += args.filling[ Math.floor(partial * args.filling.length) ];
+			}
+			bar += cli.space(args.width - stringWidth(bar));
+			
+			line += cli.applyStyles( bar, (args.amount === args.max) ? args.styles.indeterminate : args.styles.bar );
+			line += cli.applyStyles( args.braces[1], args.styles.braces );
+			
+			// percentage
+			if (args.pct) {
+				line += " ";
+				var pct = cli.pct(args.amount, args.max, true);
+				line += cli.applyStyles( pct, args.styles.pct );
+			}
+			
+			return line;
+		},
+		
 		draw: function() {
 			// draw progress bar, spinner
 			if (!this.running) return;
