@@ -116,6 +116,7 @@ var cli = module.exports = {
 	emoji: function(emoji) {
 		// Draw the emoji, restore its starting cursor position, then explicitly move
 		// forward two cells.  This overrides each terminal's automatic cursor advance.
+		if (!this.tty()) return emoji;
 		return '\u001b7' + emoji + '\u001b8\u001b[2C';
 	},
 	
